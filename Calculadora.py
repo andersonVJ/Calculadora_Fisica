@@ -23,16 +23,19 @@ def calcular_trabajo():
         # Cálculo del trabajo de la fuerza aplicada en X e Y
         trabajo_fuerza_x = fuerza * desplazamiento * math.cos(angulo_rad)
         trabajo_fuerza_y = fuerza * desplazamiento * math.sin(angulo_rad)
+        # Cálculo del trabajo de las fuerzas totales (sumando el trabajo en X e Y)
+        trabajo_fuerza_total = trabajo_fuerza_x + trabajo_fuerza_y
         # Cálculo del trabajo de la fricción
         trabajo_friccion = -fuerza_friccion * desplazamiento
         # Trabajo total
-        trabajo_total = trabajo_fuerza_x + trabajo_fuerza_y + trabajo_friccion
+        trabajo_total = trabajo_fuerza_total + trabajo_friccion
         # Mostrar resultados detallados
         resultado_trabajo.config(text=f"Peso: {peso:.2f} N\n"
                                       f"Fuerza Normal: {fuerza_normal:.2f} N\n"
                                       f"Fuerza de Fricción: {fuerza_friccion:.2f} N\n"
                                       f"Trabajo en X: {trabajo_fuerza_x:.2f} J\n"
                                       f"Trabajo en Y: {trabajo_fuerza_y:.2f} J\n"
+                                      f"Trabajo de la Fuerza Total: {trabajo_fuerza_total:.2f} J\n"
                                       f"Trabajo de la Fricción: {trabajo_friccion:.2f} J\n"
                                       f"Trabajo Total: {trabajo_total:.2f} J")
     except ValueError:
