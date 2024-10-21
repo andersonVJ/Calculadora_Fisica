@@ -351,7 +351,7 @@ class CalculadoraApp:
             self.pasos_trabajo.insert(tk.END, pasos)
         
         except ValueError:
-        messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos.")
+            messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos.")
 
     def calcular_energia_cinetica(self):
         try:
