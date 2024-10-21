@@ -95,10 +95,6 @@ class CalculadoraApp:
         self.masa_trabajo_unidad.set('kg')
         self.masa_trabajo_unidad.grid(row=4, column=2, padx=5, pady=5)
 
-        ttk.Label(tab, text="Incertidumbre (%):").grid(row=5, column=0, padx=5, pady=5, sticky="e")
-        self.incertidumbre_entry = ttk.Entry(tab, validate="key", validatecommand=(self.master.register(self.validar_numero), '%P'))
-        self.incertidumbre_entry.grid(row=5, column=1, padx=5, pady=5)
-
         ttk.Label(tab, text="Unidad de resultado:").grid(row=6, column=0, padx=5, pady=5, sticky="e")
         self.resultado_trabajo_unidad = ttk.Combobox(tab, values=['J', 'kJ', 'W', 'kW', 'hp'])
         self.resultado_trabajo_unidad.set('J')
@@ -229,8 +225,6 @@ class CalculadoraApp:
             coef_friccion = self.coef_friccion_entry.get()
             masa = self.masa_trabajo_entry.get()
 
-            incertidumbre = float(self.incertidumbre_entry.get()) / 100 if self.incertidumbre_entry.get() else 0.0
-
             if coef_friccion and masa:
                 coef_friccion = float(coef_friccion)
                 masa = float(masa)
@@ -241,16 +235,19 @@ class CalculadoraApp:
                 trabajo = calcular_trabajo(fuerza, desplazamiento, angulo)
                 normal = 0
 
-            trabajo_incertidumbre = trabajo * incertidumbre
-            normal_incertidumbre = normal * incertidumbre
+            # Calculamos la incertidumbre relativa
+            incertidumbre_relativa = self.calcular_incertidumbre_relativa(fuerza, desplazamiento, angulo, coef_friccion, masa)
+            
+            trabajo_incertidumbre = trabajo * incertidumbre_relativa
+            normal_incertidumbre = normal * incertidumbre_relativa
             
             trabajo_convertido = convertir_unidades(trabajo, 'J', self.resultado_trabajo_unidad.get())
             normal_convertido = convertir_unidades(normal, 'N', self.resultado_trabajo_unidad.get())
 
-            self.resultado_trabajo.config(text=f"Trabajo: {trabajo_convertido:.2f} {self.resultado_trabajo_unidad.get()} ± {trabajo_incertidumbre:.2f}")
-            self.resultado_normal.config(text=f"Fuerza Normal: {normal_convertido:.2f} N ± {normal_incertidumbre:.2f}")
+            self.resultado_trabajo.config(text=f"Trabajo: {trabajo_convertido:.2f} ± {trabajo_incertidumbre:.2f} {self.resultado_trabajo_unidad.get()}")
+            self.resultado_normal.config(text=f"Fuerza Normal: {normal_convertido:.2f} ± {normal_incertidumbre:.2f} N")
 
-            pasos = self.generar_pasos_trabajo(fuerza, desplazamiento, angulo, coef_friccion, masa, trabajo, normal)
+            pasos = self.generar_pasos_trabajo(fuerza, desplazamiento, angulo, coef_friccion, masa, trabajo, normal, incertidumbre_relativa)
             self.pasos_trabajo.delete('1.0', tk.END)
             self.pasos_trabajo.insert(tk.END, pasos)
         
@@ -266,11 +263,16 @@ class CalculadoraApp:
             velocidad = convertir_unidades(velocidad, self.velocidad_unidad.get(), 'm/s')
             
             ec = calcular_energia_cinetica(masa, velocidad)
+            
+            # Calculamos la incertidumbre relativa
+            incertidumbre_relativa = self.calcular_incertidumbre_relativa(masa, velocidad)
+            
+            ec_incertidumbre = ec * incertidumbre_relativa
             ec_convertida = convertir_unidades(ec, 'J', self.resultado_ec_unidad.get())
             
-            self.resultado_ec.config(text=f"Energía Cinética: {ec_convertida:.2f} {self.resultado_ec_unidad.get()}")
+            self.resultado_ec.config(text=f"Energía Cinética: {ec_convertida:.2f} ± {ec_incertidumbre:.2f} {self.resultado_ec_unidad.get()}")
             
-            pasos = self.generar_pasos_energia_cinetica(masa, velocidad, ec, ec_convertida)
+            pasos = self.generar_pasos_energia_cinetica(masa, velocidad, ec, ec_convertida, incertidumbre_relativa)
             self.pasos_ec.delete('1.0', tk.END)
             self.pasos_ec.insert(tk.END, pasos)
         except ValueError:
@@ -285,11 +287,16 @@ class CalculadoraApp:
             altura = convertir_unidades(altura, self.altura_unidad.get(), 'm')
             
             epg = calcular_energia_potencial_gravitatoria(masa, altura)
+            
+            # Calculamos la incertidumbre relativa
+            incertidumbre_relativa = self.calcular_incertidumbre_relativa(masa, altura)
+            
+            epg_incertidumbre = epg * incertidumbre_relativa
             epg_convertida = convertir_unidades(epg, 'J', self.resultado_epg_unidad.get())
             
-            self.resultado_epg.config(text=f"Energía Potencial Gravitatoria: {epg_convertida:.2f} {self.resultado_epg_unidad.get()}")
+            self.resultado_epg.config(text=f"Energía Potencial Gravitatoria: {epg_convertida:.2f} ± {epg_incertidumbre:.2f} {self.resultado_epg_unidad.get()}")
             
-            pasos = self.generar_pasos_energia_potencial_gravitatoria(masa, altura, epg, epg_convertida)
+            pasos = self.generar_pasos_energia_potencial_gravitatoria(masa, altura, epg, epg_convertida, incertidumbre_relativa)
             self.pasos_epg.delete('1.0', tk.END)
             self.pasos_epg.insert(tk.END, pasos)
         except ValueError:
@@ -304,17 +311,29 @@ class CalculadoraApp:
             deformacion = convertir_unidades(deformacion, self.deformacion_unidad.get(), 'm')
             
             epe = calcular_energia_potencial_elastica(k, deformacion)
+            
+            # Calculamos la incertidumbre relativa
+            incertidumbre_relativa = self.calcular_incertidumbre_relativa(k, deformacion)
+            
+            epe_incertidumbre = epe * incertidumbre_relativa
             epe_convertida = convertir_unidades(epe, 'J', self.resultado_epe_unidad.get())
             
-            self.resultado_epe.config(text=f"Energía Potencial Elástica: {epe_convertida:.2f} {self.resultado_epe_unidad.get()}")
+            self.resultado_epe.config(text=f"Energía Potencial Elástica: {epe_convertida:.2f} ± {epe_incertidumbre:.2f} {self.resultado_epe_unidad.get()}")
             
-            pasos = self.generar_pasos_energia_potencial_elastica(k, deformacion, epe, epe_convertida)
+            pasos = self.generar_pasos_energia_potencial_elastica(k, deformacion, epe, epe_convertida, incertidumbre_relativa)
             self.pasos_epe.delete('1.0', tk.END)
             self.pasos_epe.insert(tk.END, pasos)
         except ValueError:
             messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos.")
 
-    def generar_pasos_trabajo(self, fuerza, desplazamiento, angulo, coef_friccion, masa, trabajo, normal):
+    def calcular_incertidumbre_relativa(self, *args):
+        # Asumimos una incertidumbre relativa del 1% para cada variable
+        incertidumbre_por_variable = 0.01
+        numero_variables = len(args)
+        incertidumbre_total = math.sqrt(sum([incertidumbre_por_variable**2 for _ in range(numero_variables)]))
+        return incertidumbre_total
+
+    def generar_pasos_trabajo(self, fuerza, desplazamiento, angulo, coef_friccion, masa, trabajo, normal, incertidumbre):
         pasos = f"Pasos:\n"
         pasos += f"1. Convertir fuerza a N: {fuerza:.2f} N\n"
         pasos += f"2. Convertir desplazamiento a m: {desplazamiento:.2f} m\n"
@@ -325,30 +344,39 @@ class CalculadoraApp:
             pasos += f"5. Calcular la fuerza normal = m * g * cos(θ) = {masa:.2f} * 9.8 * cos({angulo}°) = {normal:.2f} N\n"
             pasos += f"6. Calcular trabajo total = {trabajo:.2f} J\n"
 
+        pasos += f"\nIncertidumbre relativa calculada: {incertidumbre:.2%}\n"
+        pasos += f"Esta incertidumbre se basa en una estimación del 1% de error para cada variable medida."
+
         return pasos
 
-    def generar_pasos_energia_cinetica(self, masa, velocidad, ec, ec_convertida):
+    def generar_pasos_energia_cinetica(self, masa, velocidad, ec, ec_convertida, incertidumbre):
         pasos = f"Pasos:\n"
         pasos += f"1. Convertir masa a kg: {masa:.2f} kg\n"
         pasos += f"2. Convertir velocidad a m/s: {velocidad:.2f} m/s\n"
         pasos += f"3. Calcular EC = 1/2 * m * v^2 = 1/2 * {masa:.2f} * {velocidad:.2f}^2 = {ec:.2f} J\n"
-        pasos += f"4. Convertir resultado a {self.resultado_ec_unidad.get()}: {ec_convertida:.2f} {self.resultado_ec_unidad.get()}"
+        pasos += f"4. Convertir resultado a {self.resultado_ec_unidad.get()}: {ec_convertida:.2f} {self.resultado_ec_unidad.get()}\n"
+        pasos += f"\nIncertidumbre relativa calculada: {incertidumbre:.2%}\n"
+        pasos += f"Esta incertidumbre se basa en una estimación del 1% de error para cada variable medida."
         return pasos
 
-    def generar_pasos_energia_potencial_gravitatoria(self, masa, altura, epg, epg_convertida):
+    def generar_pasos_energia_potencial_gravitatoria(self, masa, altura, epg, epg_convertida, incertidumbre):
         pasos = f"Pasos:\n"
         pasos += f"1. Convertir masa a kg: {masa:.2f} kg\n"
         pasos += f"2. Convertir altura a m: {altura:.2f} m\n"
         pasos += f"3. Calcular EPG = m * g * h = {masa:.2f} * 9.8 * {altura:.2f} = {epg:.2f} J\n"
-        pasos += f"4. Convertir resultado a {self.resultado_epg_unidad.get()}: {epg_convertida:.2f} {self.resultado_epg_unidad.get()}"
+        pasos += f"4. Convertir resultado a {self.resultado_epg_unidad.get()}: {epg_convertida:.2f} {self.resultado_epg_unidad.get()}\n"
+        pasos += f"\nIncertidumbre relativa calculada: {incertidumbre:.2%}\n"
+        pasos += f"Esta incertidumbre se basa en una estimación del 1% de error para cada variable medida."
         return pasos
 
-    def generar_pasos_energia_potencial_elastica(self, k, deformacion, epe, epe_convertida):
+    def generar_pasos_energia_potencial_elastica(self, k, deformacion, epe, epe_convertida, incertidumbre):
         pasos = f"Pasos:\n"
         pasos += f"1. Convertir constante elástica a N/m: {k:.2f} N/m\n"
         pasos += f"2. Convertir deformación a m: {deformacion:.2f} m\n"
         pasos += f"3. Calcular EPE = 1/2 * k * x^2 = 1/2 * {k:.2f} * {deformacion:.2f}^2 = {epe:.2f} J\n"
-        pasos += f"4. Convertir resultado a {self.resultado_epe_unidad.get()}: {epe_convertida:.2f} {self.resultado_epe_unidad.get()}"
+        pasos += f"4. Convertir resultado a {self.resultado_epe_unidad.get()}: {epe_convertida:.2f} {self.resultado_epe_unidad.get()}\n"
+        pasos += f"\nIncertidumbre relativa calculada: {incertidumbre:.2%}\n"
+        pasos += f"Esta incertidumbre se basa en una estimación del 1% de error para cada variable medida."
         return pasos
 
     def mostrar_instrucciones(self):
