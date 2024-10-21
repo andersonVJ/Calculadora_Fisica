@@ -9,7 +9,8 @@ def convertir_unidades(valor, unidad_origen, unidad_destino):
         'N': 1, 'kN': 1000,
         'kg': 1, 'g': 0.001, 't': 1000,
         'm/s': 1, 'km/h': 1/3.6,
-        'J': 1, 'kJ': 1000, 'W': 1, 'kW': 1000, 'hp': 745.7
+        'J': 1, 'kJ': 1000, 'W': 1, 'kW': 1000, 'hp': 745.7,
+        'N/m': 1, 'kN/m': 1000
     }
     
     # Convertir a unidad base
@@ -94,6 +95,7 @@ class CalculadoraApp:
         self.masa_trabajo_unidad = ttk.Combobox(tab, values=['kg', 'g', 't'])
         self.masa_trabajo_unidad.set('kg')
         self.masa_trabajo_unidad.grid(row=4, column=2, padx=5, pady=5)
+
 
         ttk.Label(tab, text="Unidad de resultado:").grid(row=6, column=0, padx=5, pady=5, sticky="e")
         self.resultado_trabajo_unidad = ttk.Combobox(tab, values=['J', 'kJ', 'W', 'kW', 'hp'])
