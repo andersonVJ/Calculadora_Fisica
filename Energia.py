@@ -145,9 +145,11 @@ class CalculadoraApp:
 
         ttk.Button(tab, text="Calcular", command=self.calcular_energia_cinetica).grid(row=3, column=0, columnspan=3, pady=10)
 
+        # Cambiado el row del label de resultado a 4
         self.resultado_ec = ttk.Label(tab, text="")
-        self.resultado_ec.grid(row=5, column=0, columnspan=3)
+        self.resultado_ec.grid(row=4, column=0, columnspan=3)
 
+        # Cambiado el row del text widget a 5
         self.pasos_ec = tk.Text(tab, height=8, width=90)
         self.pasos_ec.grid(row=5, column=0, columnspan=3, padx=5, pady=5)
 
@@ -348,18 +350,22 @@ class CalculadoraApp:
         pasos += f"2. Convertir desplazamiento a m: {desplazamiento:.2f} m\n"
         pasos += f"3. Calcular trabajo de la fuerza = F * d * cos(θ) = {fuerza:.2f} * {desplazamiento:.2f} * cos({angulo}°) = {fuerza * desplazamiento * math.cos(math.radians(angulo)):.2f} J\n"
 
-        if coef_friccion and masa:
-        # Cálculo de la fuerza normal
+        # Verificar si hay coeficiente de fricción y masa antes de calcular
+        if coef_friccion and masa and coef_friccion != "" and masa != "":
+            # Cálculo de la fuerza normal
             normal = masa * 9.8 * math.cos(math.radians(angulo))
             pasos += f"4. Calcular la fuerza normal = m * g * cos(θ) = {masa:.2f} * 9.8 * cos({angulo}°) = {normal:.2f} N\n"
-        
-        # Cálculo del trabajo de la fricción
-        trabajo_friccion = -coef_friccion * normal * desplazamiento
-        pasos += f"5. Calcular trabajo de la fricción = -μ * N * d = -{coef_friccion:.2f} * {normal:.2f} * {desplazamiento:.2f} = {trabajo_friccion:.2f} J\n"
+            
+            # Cálculo del trabajo de la fricción
+            trabajo_friccion = -float(coef_friccion) * normal * desplazamiento
+            pasos += f"5. Calcular trabajo de la fricción = -μ * N * d = -{float(coef_friccion):.2f} * {normal:.2f} * {desplazamiento:.2f} = {trabajo_friccion:.2f} J\n"
 
-        # Cálculo del trabajo total
-        trabajo_total = (fuerza * desplazamiento * math.cos(math.radians(angulo))) + trabajo_friccion
-        pasos += f"6. Calcular trabajo total = {trabajo_total:.2f} J\n"
+            # Cálculo del trabajo total
+            trabajo_total = (fuerza * desplazamiento * math.cos(math.radians(angulo))) + trabajo_friccion
+            pasos += f"6. Calcular trabajo total = {trabajo_total:.2f} J\n"
+        else:
+            trabajo_total = fuerza * desplazamiento * math.cos(math.radians(angulo))
+            pasos += f"4. Trabajo total (sin fricción) = {trabajo_total:.2f} J\n"
 
         pasos += f"\nIncertidumbre relativa calculada: {incertidumbre:.2%}\n"
         pasos += "Esta incertidumbre se basa en una estimación del 1% de error para cada variable medida."
