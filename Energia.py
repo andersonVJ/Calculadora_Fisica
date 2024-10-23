@@ -39,11 +39,18 @@ class CalculadoraApp:
     def __init__(self, master):
         self.master = master
         self.master.title("Calculadora de Física")
-        self.master.geometry("600x400")
+    
+    # Establece dimensiones iniciales
+        self.master.geometry("800x460")
 
-        self.notebook = ttk.Notebook(self.master)
-        self.notebook.pack(expand=True, fill="both")
+    # Crear un frame para contener todo el contenido y centrarlo
+        self.main_frame = tk.Frame(self.master)
+        self.main_frame.pack(expand=True)  # Esto expande el frame principal
 
+        self.notebook = ttk.Notebook(self.main_frame)  # Asignamos el Notebook al frame principal
+        self.notebook.pack(expand=True, fill="both")  # Esto asegura que se expanda y llene todo
+
+    # Configurar el estilo y pestañas
         self.configurar_estilo()
         self.crear_menu()
         self.crear_tab_trabajo()
@@ -110,7 +117,7 @@ class CalculadoraApp:
         self.resultado_normal = ttk.Label(tab, text="")
         self.resultado_normal.grid(row=9, column=0, columnspan=3)
 
-        self.pasos_trabajo = tk.Text(tab, height=5, width=60)
+        self.pasos_trabajo = tk.Text(tab, height=10, width=90)
         self.pasos_trabajo.grid(row=10, column=0, columnspan=3, padx=5, pady=5)
 
     def crear_tab_energia_cinetica(self):
@@ -139,9 +146,9 @@ class CalculadoraApp:
         ttk.Button(tab, text="Calcular", command=self.calcular_energia_cinetica).grid(row=3, column=0, columnspan=3, pady=10)
 
         self.resultado_ec = ttk.Label(tab, text="")
-        self.resultado_ec.grid(row=4, column=0, columnspan=3)
+        self.resultado_ec.grid(row=5, column=0, columnspan=3)
 
-        self.pasos_ec = tk.Text(tab, height=5, width=60)
+        self.pasos_ec = tk.Text(tab, height=8, width=90)
         self.pasos_ec.grid(row=5, column=0, columnspan=3, padx=5, pady=5)
 
     def crear_tab_energia_potencial_gravitatoria(self):
@@ -172,7 +179,7 @@ class CalculadoraApp:
         self.resultado_epg = ttk.Label(tab, text="")
         self.resultado_epg.grid(row=4, column=0, columnspan=3)
 
-        self.pasos_epg = tk.Text(tab, height=5, width=60)
+        self.pasos_epg = tk.Text(tab, height=8, width=90)
         self.pasos_epg.grid(row=5, column=0, columnspan=3, padx=5, pady=5)
 
     def crear_tab_energia_potencial_elastica(self):
@@ -203,7 +210,7 @@ class CalculadoraApp:
         self.resultado_epe = ttk.Label(tab, text="")
         self.resultado_epe.grid(row=4, column=0, columnspan=3)
 
-        self.pasos_epe = tk.Text(tab, height=5, width=60)
+        self.pasos_epe = tk.Text(tab, height=10, width=90)
         self.pasos_epe.grid(row=5, column=0, columnspan=3, padx=5, pady=5)
 
     def validar_numero(self, P):
@@ -336,18 +343,26 @@ class CalculadoraApp:
         return incertidumbre_total
 
     def generar_pasos_trabajo(self, fuerza, desplazamiento, angulo, coef_friccion, masa, trabajo, normal, incertidumbre):
-        pasos = f"Pasos:\n"
+        pasos = "Pasos:\n"
         pasos += f"1. Convertir fuerza a N: {fuerza:.2f} N\n"
         pasos += f"2. Convertir desplazamiento a m: {desplazamiento:.2f} m\n"
         pasos += f"3. Calcular trabajo de la fuerza = F * d * cos(θ) = {fuerza:.2f} * {desplazamiento:.2f} * cos({angulo}°) = {fuerza * desplazamiento * math.cos(math.radians(angulo)):.2f} J\n"
 
         if coef_friccion and masa:
-            pasos += f"4. Calcular trabajo de la fricción = -μ * m * g * d = -{coef_friccion:.2f} * {masa:.2f} * 9.8 * {desplazamiento:.2f} = {-coef_friccion * masa * 9.8 * desplazamiento:.2f} J\n"
-            pasos += f"5. Calcular la fuerza normal = m * g * cos(θ) = {masa:.2f} * 9.8 * cos({angulo}°) = {normal:.2f} N\n"
-            pasos += f"6. Calcular trabajo total = {trabajo:.2f} J\n"
+        # Cálculo de la fuerza normal
+            normal = masa * 9.8 * math.cos(math.radians(angulo))
+            pasos += f"4. Calcular la fuerza normal = m * g * cos(θ) = {masa:.2f} * 9.8 * cos({angulo}°) = {normal:.2f} N\n"
+        
+        # Cálculo del trabajo de la fricción
+        trabajo_friccion = -coef_friccion * normal * desplazamiento
+        pasos += f"5. Calcular trabajo de la fricción = -μ * N * d = -{coef_friccion:.2f} * {normal:.2f} * {desplazamiento:.2f} = {trabajo_friccion:.2f} J\n"
+
+        # Cálculo del trabajo total
+        trabajo_total = (fuerza * desplazamiento * math.cos(math.radians(angulo))) + trabajo_friccion
+        pasos += f"6. Calcular trabajo total = {trabajo_total:.2f} J\n"
 
         pasos += f"\nIncertidumbre relativa calculada: {incertidumbre:.2%}\n"
-        pasos += f"Esta incertidumbre se basa en una estimación del 1% de error para cada variable medida."
+        pasos += "Esta incertidumbre se basa en una estimación del 1% de error para cada variable medida."
 
         return pasos
 
