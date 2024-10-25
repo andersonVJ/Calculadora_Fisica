@@ -84,7 +84,7 @@ class CalculadoraApp:
         ttk.Label(tab, text="Desplazamiento:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
         self.desplazamiento_entry = ttk.Entry(tab, validate="key", validatecommand=(self.master.register(self.validar_numero), '%P'))
         self.desplazamiento_entry.grid(row=1, column=1, padx=5, pady=5)
-        self.desplazamiento_unidad = ttk.Combobox(tab, values=['m', 'cm', 'km'])
+        self.desplazamiento_unidad = ttk.Combobox(tab, values=['m', 'mm', 'cm', 'km'])
         self.desplazamiento_unidad.set('m')
         self.desplazamiento_unidad.grid(row=1, column=2, padx=5, pady=5)
 
@@ -167,7 +167,7 @@ class CalculadoraApp:
         ttk.Label(tab, text="Altura:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
         self.altura_entry = ttk.Entry(tab, validate="key", validatecommand=(self.master.register(self.validar_numero), '%P'))
         self.altura_entry.grid(row=1, column=1, padx=5, pady=5)
-        self.altura_unidad = ttk.Combobox(tab, values=['m', 'cm', 'km'])
+        self.altura_unidad = ttk.Combobox(tab, values=['m', 'mm', 'cm', 'km'])
         self.altura_unidad.set('m')
         self.altura_unidad.grid(row=1, column=2, padx=5, pady=5)
 
@@ -198,7 +198,7 @@ class CalculadoraApp:
         ttk.Label(tab, text="Deformación:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
         self.deformacion_entry = ttk.Entry(tab, validate="key", validatecommand=(self.master.register(self.validar_numero), '%P'))
         self.deformacion_entry.grid(row=1, column=1, padx=5, pady=5)
-        self.deformacion_unidad = ttk.Combobox(tab, values=['m', 'cm', 'mm'])
+        self.deformacion_unidad = ttk.Combobox(tab, values=['m', 'mm', 'cm', 'mm'])
         self.deformacion_unidad.set('m')
         self.deformacion_unidad.grid(row=1, column=2, padx=5, pady=5)
 
