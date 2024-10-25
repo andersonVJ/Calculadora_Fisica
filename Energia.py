@@ -69,6 +69,26 @@ class CalculadoraApp:
         ayuda_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Ayuda", menu=ayuda_menu)
         ayuda_menu.add_command(label="Instrucciones", command=self.mostrar_instrucciones)
+        
+    def limpiar_campos(self, entradas, unidades, resultados, pasos):
+    # Limpiar las entradas
+        for entrada in entradas:
+            entrada.delete(0, tk.END)
+
+    # Reiniciar las unidades a sus valores por defecto
+        for unidad, valor_default in unidades.items():
+            unidad.set(valor_default)
+
+    # Limpiar las etiquetas de resultados
+        for resultado in resultados:
+            resultado.config(text="")
+
+    # Limpiar los pasos de cálculo
+        for paso in pasos:
+         paso.delete(1.0, tk.END)
+
+        
+    
 
     def crear_tab_trabajo(self):
         tab = ttk.Frame(self.notebook)
@@ -119,6 +139,15 @@ class CalculadoraApp:
 
         self.pasos_trabajo = tk.Text(tab, height=10, width=90)
         self.pasos_trabajo.grid(row=10, column=0, columnspan=3, padx=5, pady=5)
+        
+        ttk.Button(tab, text="Limpiar", command=lambda: self.limpiar_campos(
+        [self.fuerza_entry, self.desplazamiento_entry, self.angulo_entry, self.coef_friccion_entry, self.masa_trabajo_entry],
+            {self.fuerza_unidad: 'N', self.desplazamiento_unidad: 'm', self.masa_trabajo_unidad: 'kg', self.resultado_trabajo_unidad: 'J'},
+            [self.resultado_trabajo, self.resultado_normal],
+            [self.pasos_trabajo])).grid(row=11, column=0, columnspan=3, pady=10)
+
+        
+   
 
     def crear_tab_energia_cinetica(self):
         tab = ttk.Frame(self.notebook)
@@ -152,6 +181,13 @@ class CalculadoraApp:
         # Cambiado el row del text widget a 5
         self.pasos_ec = tk.Text(tab, height=8, width=90)
         self.pasos_ec.grid(row=5, column=0, columnspan=3, padx=5, pady=5)
+        ttk.Button(tab, text="Limpiar", command=lambda: self.limpiar_campos(
+        [self.masa_ec_entry, self.velocidad_entry],
+        {self.masa_ec_unidad: 'kg', self.velocidad_unidad: 'm/s', self.resultado_ec_unidad: 'J'},
+        [self.resultado_ec],
+        [self.pasos_ec])).grid(row=6, column=0, columnspan=3, pady=10)
+
+       
 
     def crear_tab_energia_potencial_gravitatoria(self):
         tab = ttk.Frame(self.notebook)
@@ -183,6 +219,13 @@ class CalculadoraApp:
 
         self.pasos_epg = tk.Text(tab, height=8, width=90)
         self.pasos_epg.grid(row=5, column=0, columnspan=3, padx=5, pady=5)
+        ttk.Button(tab, text="Limpiar", command=lambda: self.limpiar_campos(
+        [self.masa_epg_entry, self.altura_entry],
+        {self.masa_epg_unidad: 'kg', self.altura_unidad: 'm', self.resultado_epg_unidad: 'J'},
+        [self.resultado_epg],
+        [self.pasos_epg])).grid(row=6, column=0, columnspan=3, pady=10)
+
+        
 
     def crear_tab_energia_potencial_elastica(self):
         tab = ttk.Frame(self.notebook)
@@ -208,12 +251,18 @@ class CalculadoraApp:
         self.resultado_epe_unidad.grid(row=2, column=1, padx=5, pady=5)
 
         ttk.Button(tab, text="Calcular", command=self.calcular_energia_potencial_elastica).grid(row=3, column=0, columnspan=3, pady=10)
-
+        
         self.resultado_epe = ttk.Label(tab, text="")
         self.resultado_epe.grid(row=4, column=0, columnspan=3)
 
         self.pasos_epe = tk.Text(tab, height=10, width=90)
         self.pasos_epe.grid(row=5, column=0, columnspan=3, padx=5, pady=5)
+        ttk.Button(tab, text="Limpiar", command=lambda: self.limpiar_campos(
+        [self.k_entry, self.deformacion_entry],
+        {self.k_unidad: 'N/m', self.deformacion_unidad: 'm', self.resultado_epe_unidad: 'J'},
+        [self.resultado_epe],
+        [self.pasos_epe])).grid(row=6, column=0, columnspan=3, pady=10)
+
 
     def validar_numero(self, P):
         if P == "" or P == "-":
